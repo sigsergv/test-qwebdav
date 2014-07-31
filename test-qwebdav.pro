@@ -11,5 +11,5 @@ TARGET = test-qwebdav
 INCLUDEPATH += .
 
 # Input
-HEADERS += qwebdav.h
-SOURCES += qwebdav.cpp main.cpp
+HEADERS += qwebdav.h eventloop.h
+SOURCES += qwebdav.cpp main.cpp eventloop.cpp

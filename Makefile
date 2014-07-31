@@ -45,9 +45,13 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = main.cpp moc_qwebdav.cpp
+SOURCES       = main.cpp \
+		eventloop.cpp moc_qwebdav.cpp \
+		moc_eventloop.cpp
 OBJECTS       = main.o \
-		moc_qwebdav.o
+		eventloop.o \
+		moc_qwebdav.o \
+		moc_eventloop.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/shell-unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -107,7 +111,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exceptions.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
-		test-qwebdav.pro main.cpp
+		test-qwebdav.pro main.cpp \
+		eventloop.cpp
 QMAKE_TARGET  = test-qwebdav
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = test-qwebdav
@@ -274,7 +279,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d .tmp/test-qwebdav1.0.0 || mkdir -p .tmp/test-qwebdav1.0.0
-	$(COPY_FILE) --parents $(DIST) .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents qwebdav.h .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents main.cpp .tmp/test-qwebdav1.0.0/ && (cd `dirname .tmp/test-qwebdav1.0.0` && $(TAR) test-qwebdav1.0.0.tar test-qwebdav1.0.0 && $(COMPRESS) test-qwebdav1.0.0.tar) && $(MOVE) `dirname .tmp/test-qwebdav1.0.0`/test-qwebdav1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/test-qwebdav1.0.0
+	$(COPY_FILE) --parents $(DIST) .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents qwebdav.h eventloop.h .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents main.cpp eventloop.cpp .tmp/test-qwebdav1.0.0/ && (cd `dirname .tmp/test-qwebdav1.0.0` && $(TAR) test-qwebdav1.0.0.tar test-qwebdav1.0.0 && $(COMPRESS) test-qwebdav1.0.0.tar) && $(MOVE) `dirname .tmp/test-qwebdav1.0.0`/test-qwebdav1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/test-qwebdav1.0.0
 
 
 clean:compiler_clean 
@@ -297,11 +302,14 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_qwebdav.cpp
+compiler_moc_header_make_all: moc_qwebdav.cpp moc_eventloop.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_qwebdav.cpp
+	-$(DEL_FILE) moc_qwebdav.cpp moc_eventloop.cpp
 moc_qwebdav.cpp: qwebdav.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/cancel/projects/test-qwebdav -I/home/cancel/projects/test-qwebdav -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include qwebdav.h -o moc_qwebdav.cpp
+
+moc_eventloop.cpp: eventloop.h
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/cancel/projects/test-qwebdav -I/home/cancel/projects/test-qwebdav -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtXml -I/usr/include/x86_64-linux-gnu/qt5/QtNetwork -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include eventloop.h -o moc_eventloop.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -316,11 +324,18 @@ compiler_clean: compiler_moc_header_clean
 ####### Compile
 
 main.o: main.cpp qwebdav.cpp \
-		qwebdav.h
+		qwebdav.h \
+		eventloop.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+
+eventloop.o: eventloop.cpp eventloop.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o eventloop.o eventloop.cpp
 
 moc_qwebdav.o: moc_qwebdav.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_qwebdav.o moc_qwebdav.cpp
+
+moc_eventloop.o: moc_eventloop.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_eventloop.o moc_eventloop.cpp
 
 ####### Install
 

@@ -1,19 +1,27 @@
 #include <QtCore>
 #include <QtDebug>
+#include <QtNetwork>
 
 #include "qwebdav.h"
+// #include "eventloop.h"
 
 struct QWebDav::Private
 {
     QUrl baseUrl;
     QString username;
     QString password;
+    QWebDav::Error lastError;
+
+    QNetworkReply * lastAuthReply;
 };
 
 QWebDav::QWebDav(QObject* parent)
     : QNetworkAccessManager(parent)
 {
     p = new Private();
+    p->lastError = NoError;
+
+    connect(this, SIGNAL(authenticationRequired(QNetworkReply*,QAuthenticator*)), this, SLOT(provideAuthentication(QNetworkReply*,QAuthenticator*)));
 }
 
 QWebDav::~QWebDav()
@@ -21,8 +29,16 @@ QWebDav::~QWebDav()
     delete p;
 }
 
+QWebDav::Error QWebDav::lastError()
+{
+    return p->lastError;
+}
+
+
 void QWebDav::connectToHost(const QString & hostName, quint16 port)
 {
+    Q_UNUSED(hostName);
+    Q_UNUSED(port);
     // Do nothing
 }
 
@@ -35,26 +51,41 @@ void QWebDav::connectToHost(const QString & hostName, quint16 port, const QStrin
     p->password = password;
 
     QUrl reqUrl(p->baseUrl);
-    QNetworkRequest req;
+    QNetworkRequest request;
 
-    req.setUrl(reqUrl);
+    request.setUrl(reqUrl);
 
-    QNetworkReply * reply = createRequest("GET", req, QByteArray());
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
+    p->lastError = NoError;
+    QNetworkReply * reply = createRequest("HEAD", request, QByteArray());
 
+    QEventLoop * loop;
+    loop = new QEventLoop();
+    connect(reply, SIGNAL(finished()), loop, SLOT(quit()));
+    QTimer::singleShot(2000, loop, SLOT(quit()));  // 2 seconds timeout
+    loop->exec();
+    if (reply->isRunning()) {
+        // connection is not established, so terminated it and emit corresponding signal
+        reply->abort();
+        return;
+    }
+    delete loop;
+
+    // connection successful, so destroy reply and continue
+    reply->abort();
+    reply->deleteLater();
+
+    /*
     QString response = QString::fromUtf8(reply->readAll());
-    std::cout << "finished:" << std::endl;
-    std::cout << response.toStdString() << std::endl;
-    std::cout << "Headers:" << std::endl;
+    qDebug() << "finished: " << response;
 
-    int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    qDebug() << "Headers:";
+
+    // int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     foreach (const QNetworkReply::RawHeaderPair & p, reply->rawHeaderPairs()) {
-        std::cout << p.first.constData() << ": " << p.second.constData() << std::endl;
+        qDebug() << p.first.constData() << ": " << p.second.constData();
     }
-
+    */
 }
 
 
@@ -76,6 +107,24 @@ QNetworkReply * QWebDav::createRequest(const QString & method, QNetworkRequest &
     dataIO->open(QIODevice::ReadOnly);
 
     QNetworkReply* reply = createRequest(method, req, dataIO);
-    // m_outDataDevices.insert(reply, dataIO);
     return reply;
+}
+
+
+void QWebDav::provideAuthentication(QNetworkReply * reply, QAuthenticator * authenticator)
+{
+    Q_UNUSED(reply);
+
+    if (reply == p->lastAuthReply) {
+        reply->abort();
+        reply->deleteLater();
+        p->lastAuthReply = 0;
+        p->lastError = AuthFailedError;
+        return;
+    }
+
+    authenticator->setUser(p->username);
+    authenticator->setPassword(p->password);
+
+    p->lastAuthReply = reply;
 }
