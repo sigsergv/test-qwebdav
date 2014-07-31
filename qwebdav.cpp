@@ -3,7 +3,7 @@
 #include <QtNetwork>
 
 #include "qwebdav.h"
-// #include "eventloop.h"
+#include "eventloop.h"
 
 struct QWebDav::Private
 {
@@ -50,22 +50,39 @@ void QWebDav::connectToHost(const QString & hostName, quint16 port, const QStrin
     p->username = username;
     p->password = password;
 
+#ifdef Q_OS_MAC
+    // workaround for MacOSX, see http://stackoverflow.com/questions/15707124/
+    QNetworkProxy proxy = this->proxy();
+    proxy.setHostName(" ");
+    setProxy(proxy);
+#endif
+
     QUrl reqUrl(p->baseUrl);
     QNetworkRequest request;
 
+    reqUrl.setPath("/");
     request.setUrl(reqUrl);
 
     p->lastError = NoError;
-    QNetworkReply * reply = createRequest("HEAD", request, QByteArray());
-
-    QEventLoop * loop;
-    loop = new QEventLoop();
+    EventLoop * loop;
+    loop = new EventLoop();
+    QNetworkReply * reply = davRequest("GET", request, QByteArray());
     connect(reply, SIGNAL(finished()), loop, SLOT(quit()));
-    QTimer::singleShot(2000, loop, SLOT(quit()));  // 2 seconds timeout
+    QTimer::singleShot(2000, loop, SLOT(quitTimeout()));  // 2 seconds timeout
     loop->exec();
-    if (reply->isRunning()) {
+
+    if (loop->status() == EventLoop::StatusTimeout && reply->isRunning()) {
         // connection is not established, so terminated it and emit corresponding signal
         reply->abort();
+        reply->deleteLater();
+        p->lastError = ConnectionTimeoutError;
+        return;
+    }
+    if (p->lastError != AuthFailedError && reply->error() != QNetworkReply::NoError) {
+        p->lastError = NetworkError;
+        qDebug() << reply->errorString();
+        reply->abort();
+        reply->deleteLater();
         return;
     }
     delete loop;
@@ -73,23 +90,10 @@ void QWebDav::connectToHost(const QString & hostName, quint16 port, const QStrin
     // connection successful, so destroy reply and continue
     reply->abort();
     reply->deleteLater();
-
-    /*
-    QString response = QString::fromUtf8(reply->readAll());
-    qDebug() << "finished: " << response;
-
-    qDebug() << "Headers:";
-
-    // int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-    foreach (const QNetworkReply::RawHeaderPair & p, reply->rawHeaderPairs()) {
-        qDebug() << p.first.constData() << ": " << p.second.constData();
-    }
-    */
 }
 
 
-QNetworkReply * QWebDav::createRequest(const QString& method, QNetworkRequest& req, QIODevice* outgoingData)
+QNetworkReply * QWebDav::davRequest(const QString& method, QNetworkRequest& req, QIODevice* outgoingData)
 {
     if(outgoingData != 0 && outgoingData->size() !=0) {
         req.setHeader(QNetworkRequest::ContentLengthHeader, outgoingData->size());
@@ -100,20 +104,84 @@ QNetworkReply * QWebDav::createRequest(const QString& method, QNetworkRequest& r
 }
 
 
-QNetworkReply * QWebDav::createRequest(const QString & method, QNetworkRequest & req, const QByteArray& outgoingData)
+QNetworkReply * QWebDav::davRequest(const QString & method, QNetworkRequest & req, const QByteArray& outgoingData)
 { 
     QBuffer* dataIO = new QBuffer;
     dataIO->setData(outgoingData);
     dataIO->open(QIODevice::ReadOnly);
 
-    QNetworkReply* reply = createRequest(method, req, dataIO);
+    QNetworkReply* reply = davRequest(method, req, dataIO);
     return reply;
+}
+
+/**
+ * List of items for given path
+ * @param path
+ */
+void QWebDav::list(const QString & path)
+{
+    QUrl reqUrl(p->baseUrl);
+    QNetworkRequest request;
+
+    reqUrl.setPath(path);
+    request.setUrl(reqUrl);
+    request.setRawHeader(QByteArray("Depth"), "1");
+
+    p->lastError = NoError;
+    EventLoop * loop;
+    loop = new EventLoop();
+
+    QByteArray query;
+    query = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>";
+    query += "<D:propfind xmlns:D=\"DAV:\" >";
+    query += "<D:prop>";
+
+    // query += "<D:creationdate/>";
+    query += "<D:getcontentlength/>";
+    query += "<D:displayname/>";
+    query += "<D:resourcetype/>";
+    // query += "<D:getcontentlanguage/>";
+
+    query += "</D:prop>";
+    query += "</D:propfind>";
+
+    QNetworkReply * reply = davRequest("PROPFIND", request, query);
+    connect(reply, SIGNAL(finished()), loop, SLOT(quit()));
+    loop->exec();
+
+    if (p->lastError == AuthFailedError) {
+        reply->abort();
+        reply->deleteLater();
+        return;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+        p->lastError = NetworkError;
+        qDebug() << reply->errorString();
+        reply->abort();
+        reply->deleteLater();
+        return;
+    }
+    delete loop;
+
+    // parse response
+    QString response = QString::fromUtf8(reply->readAll());
+    qDebug() << "finished: " << response;
+
+    // qDebug() << "Headers:";
+
+    // // int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
+    // foreach (const QNetworkReply::RawHeaderPair & p, reply->rawHeaderPairs()) {
+    //     qDebug() << p.first.constData() << ": " << p.second.constData();
+    // }
+
 }
 
 
 void QWebDav::provideAuthentication(QNetworkReply * reply, QAuthenticator * authenticator)
 {
-    Q_UNUSED(reply);
+    // qDebug() << "auth requested";
 
     if (reply == p->lastAuthReply) {
         reply->abort();

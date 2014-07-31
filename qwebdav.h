@@ -13,17 +13,19 @@ class QWebDav : public QNetworkAccessManager
 {
     Q_OBJECT
 public:
-    enum Error {NoError=0, AuthFailedError};
+    enum Error {NoError=0, AuthFailedError, ConnectionTimeoutError, NetworkError};
 
     QWebDav(QObject* parent = 0);
     ~QWebDav();
 
-    void connectToHost(const QString & hostName, quint16 port, const QString & username, const QString & password);
     Error lastError();
+    void connectToHost(const QString & hostName, quint16 port, const QString & username, const QString & password);
+
+    void list(const QString & path);
 
 protected:
-    QNetworkReply * createRequest(const QString& method, QNetworkRequest& req, const QByteArray& outgoingData);
-    QNetworkReply * createRequest(const QString& method, QNetworkRequest& req, QIODevice* outgoingData);
+    QNetworkReply * davRequest(const QString& method, QNetworkRequest& req, const QByteArray& outgoingData);
+    QNetworkReply * davRequest(const QString& method, QNetworkRequest& req, QIODevice* outgoingData);
     void connectToHost(const QString & hostName, quint16 port = 80);
 
 protected slots:

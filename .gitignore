@@ -1,3 +1,6 @@
 *.o
 moc_*.cpp
 /test-qwebdav
+test-qwebdav.sublime-workspace
+test-qwebdav.app
+.qmake.stash
