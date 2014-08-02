@@ -4,6 +4,8 @@
 #include <QtCore>
 #include <QtNetwork>
 
+#include "qwebdav_types.h"
+
 /**
  * WebDav connection class.
  *
@@ -13,7 +15,7 @@ class QWebDav : public QNetworkAccessManager
 {
     Q_OBJECT
 public:
-    enum Error {NoError=0, AuthFailedError, ConnectionTimeoutError, NetworkError};
+    enum Error {NoError=0, AuthFailedError, ConnectionTimeoutError, NetworkError, XmlParsingError};
 
     QWebDav(QObject* parent = 0);
     ~QWebDav();
@@ -21,7 +23,7 @@ public:
     Error lastError();
     void connectToHost(const QString & hostName, quint16 port, const QString & username, const QString & password);
 
-    void list(const QString & path);
+    QList<WebDavItem> list(const QString & path);
 
 protected:
     QNetworkReply * davRequest(const QString& method, QNetworkRequest& req, const QByteArray& outgoingData);

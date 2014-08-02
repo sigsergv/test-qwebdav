@@ -12,13 +12,13 @@ MAKEFILE      = Makefile
 
 CC            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang
 CXX           = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
-DEFINES       = -DQT_NO_DEBUG -DQT_XML_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
+DEFINES       = -DQT_NO_DEBUG -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk -mmacosx-version-min=10.6 -Wall -W -fPIE $(DEFINES)
 CXXFLAGS      = -pipe -O2 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk -mmacosx-version-min=10.6 -Wall -W -fPIE $(DEFINES)
-INCPATH       = -I../../Qt/5.3/clang_64/mkspecs/macx-clang -I. -I. -I../../Qt/5.3/clang_64/lib/QtXml.framework/Versions/5/Headers -I../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers -I../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers -I. -F/Users/sigsergv/Qt/5.3/clang_64/lib
+INCPATH       = -I../../Qt/5.3/clang_64/mkspecs/macx-clang -I. -I. -I../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers -I../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers -I. -F/Users/sigsergv/Qt/5.3/clang_64/lib
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 LFLAGS        = -headerpad_max_install_names -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk -mmacosx-version-min=10.6
-LIBS          = $(SUBLIBS) -F/Users/sigsergv/Qt/5.3/clang_64/lib -framework QtXml -framework QtCore -framework QtNetwork 
+LIBS          = $(SUBLIBS) -F/Users/sigsergv/Qt/5.3/clang_64/lib -framework QtNetwork -framework QtCore 
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
 QMAKE         = /Users/sigsergv/Qt/5.3/clang_64/bin/qmake
@@ -46,12 +46,16 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = main.cpp \
-		eventloop.cpp moc_qwebdav.cpp \
-		moc_eventloop.cpp
+		eventloop.cpp \
+		propfindparser.cpp moc_qwebdav.cpp \
+		moc_eventloop.cpp \
+		moc_propfindparser.cpp
 OBJECTS       = main.o \
 		eventloop.o \
+		propfindparser.o \
 		moc_qwebdav.o \
-		moc_eventloop.o
+		moc_eventloop.o \
+		moc_propfindparser.o
 DIST          = ../../Qt/5.3/clang_64/mkspecs/features/spec_pre.prf \
 		../../Qt/5.3/clang_64/mkspecs/qdevice.pri \
 		../../Qt/5.3/clang_64/mkspecs/features/device_config.prf \
@@ -147,6 +151,7 @@ DIST          = ../../Qt/5.3/clang_64/mkspecs/features/spec_pre.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/qt_config.prf \
 		../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../Qt/5.3/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../Qt/5.3/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/default_pre.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/mac/default_pre.prf \
@@ -166,7 +171,8 @@ DIST          = ../../Qt/5.3/clang_64/mkspecs/features/spec_pre.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/yacc.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/lex.prf \
 		test-qwebdav.pro main.cpp \
-		eventloop.cpp
+		eventloop.cpp \
+		propfindparser.cpp
 QMAKE_TARGET  = test-qwebdav
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = test-qwebdav.app/Contents/MacOS/test-qwebdav
@@ -305,6 +311,7 @@ Makefile: test-qwebdav.pro ../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf .
 		../../Qt/5.3/clang_64/mkspecs/features/qt_config.prf \
 		../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf \
 		../../Qt/5.3/clang_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../Qt/5.3/clang_64/mkspecs/features/exclusive_builds.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/default_pre.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/mac/default_pre.prf \
@@ -324,9 +331,8 @@ Makefile: test-qwebdav.pro ../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf .
 		../../Qt/5.3/clang_64/mkspecs/features/yacc.prf \
 		../../Qt/5.3/clang_64/mkspecs/features/lex.prf \
 		test-qwebdav.pro \
-		/Users/sigsergv/Qt/5.3/clang_64/lib/QtXml.framework/QtXml.prl \
-		/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/QtCore.prl \
-		/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/QtNetwork.prl
+		/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/QtNetwork.prl \
+		/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/QtCore.prl
 	$(QMAKE) -o Makefile test-qwebdav.pro
 ../../Qt/5.3/clang_64/mkspecs/features/spec_pre.prf:
 ../../Qt/5.3/clang_64/mkspecs/qdevice.pri:
@@ -423,6 +429,7 @@ Makefile: test-qwebdav.pro ../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf .
 ../../Qt/5.3/clang_64/mkspecs/features/qt_config.prf:
 ../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf:
 ../../Qt/5.3/clang_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../Qt/5.3/clang_64/mkspecs/features/exclusive_builds.prf:
 ../../Qt/5.3/clang_64/mkspecs/features/default_pre.prf:
 ../../Qt/5.3/clang_64/mkspecs/features/mac/default_pre.prf:
@@ -442,9 +449,8 @@ Makefile: test-qwebdav.pro ../../Qt/5.3/clang_64/mkspecs/macx-clang/qmake.conf .
 ../../Qt/5.3/clang_64/mkspecs/features/yacc.prf:
 ../../Qt/5.3/clang_64/mkspecs/features/lex.prf:
 test-qwebdav.pro:
-/Users/sigsergv/Qt/5.3/clang_64/lib/QtXml.framework/QtXml.prl:
-/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/QtCore.prl:
 /Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/QtNetwork.prl:
+/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/QtCore.prl:
 qmake: FORCE
 	@$(QMAKE) -o Makefile test-qwebdav.pro
 
@@ -464,7 +470,7 @@ test-qwebdav.app/Contents/Info.plist:
 	@sed -e "s,@SHORT_VERSION@,1.0,g" -e "s,@TYPEINFO@,????,g" -e "s,@ICON@,,g" -e "s,@BUNDLEIDENTIFIER@,asdas.test-qwebdav,g" -e "s,@EXECUTABLE@,test-qwebdav,g" -e "s,@TYPEINFO@,????,g" ../../Qt/5.3/clang_64/mkspecs/macx-clang/Info.plist.app >test-qwebdav.app/Contents/Info.plist
 dist: 
 	@test -d .tmp/test-qwebdav1.0.0 || mkdir -p .tmp/test-qwebdav1.0.0
-	$(COPY_FILE) --parents $(DIST) .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents qwebdav.h eventloop.h .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents main.cpp eventloop.cpp .tmp/test-qwebdav1.0.0/ && (cd `dirname .tmp/test-qwebdav1.0.0` && $(TAR) test-qwebdav1.0.0.tar test-qwebdav1.0.0 && $(COMPRESS) test-qwebdav1.0.0.tar) && $(MOVE) `dirname .tmp/test-qwebdav1.0.0`/test-qwebdav1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/test-qwebdav1.0.0
+	$(COPY_FILE) --parents $(DIST) .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents qwebdav.h eventloop.h propfindparser.h qwebdav_types.h .tmp/test-qwebdav1.0.0/ && $(COPY_FILE) --parents main.cpp eventloop.cpp propfindparser.cpp .tmp/test-qwebdav1.0.0/ && (cd `dirname .tmp/test-qwebdav1.0.0` && $(TAR) test-qwebdav1.0.0.tar test-qwebdav1.0.0 && $(COMPRESS) test-qwebdav1.0.0.tar) && $(MOVE) `dirname .tmp/test-qwebdav1.0.0`/test-qwebdav1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/test-qwebdav1.0.0
 
 
 clean:compiler_clean 
@@ -489,9 +495,9 @@ compiler_objective_c_make_all:
 compiler_objective_c_clean:
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_qwebdav.cpp moc_eventloop.cpp
+compiler_moc_header_make_all: moc_qwebdav.cpp moc_eventloop.cpp moc_propfindparser.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_qwebdav.cpp moc_eventloop.cpp
+	-$(DEL_FILE) moc_qwebdav.cpp moc_eventloop.cpp moc_propfindparser.cpp
 moc_qwebdav.cpp: ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QtCore \
 		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstractanimation.h \
 		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qanimationgroup.h \
@@ -687,14 +693,24 @@ moc_qwebdav.cpp: ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/Q
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qsslsocket.h \
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qtnetworkversion.h \
 		qwebdav.h
-	/Users/sigsergv/Qt/5.3/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/sigsergv/Qt/5.3/clang_64/mkspecs/macx-clang -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtXml.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/Headers -F/Users/sigsergv/Qt/5.3/clang_64/lib qwebdav.h -o moc_qwebdav.cpp
+	/Users/sigsergv/Qt/5.3/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/sigsergv/Qt/5.3/clang_64/mkspecs/macx-clang -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/Headers -F/Users/sigsergv/Qt/5.3/clang_64/lib qwebdav.h -o moc_qwebdav.cpp
 
 moc_eventloop.cpp: ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QEventLoop \
 		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qeventloop.h \
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/QNetworkReply \
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qnetworkreply.h \
 		eventloop.h
-	/Users/sigsergv/Qt/5.3/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/sigsergv/Qt/5.3/clang_64/mkspecs/macx-clang -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtXml.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/Headers -F/Users/sigsergv/Qt/5.3/clang_64/lib eventloop.h -o moc_eventloop.cpp
+	/Users/sigsergv/Qt/5.3/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/sigsergv/Qt/5.3/clang_64/mkspecs/macx-clang -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/Headers -F/Users/sigsergv/Qt/5.3/clang_64/lib eventloop.h -o moc_eventloop.cpp
+
+moc_propfindparser.cpp: ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QObject \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qobject.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QList \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlist.h \
+		qwebdav_types.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QString \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstring.h \
+		propfindparser.h
+	/Users/sigsergv/Qt/5.3/clang_64/bin/moc $(DEFINES) -D__APPLE__ -D__GNUC__=4 -I/Users/sigsergv/Qt/5.3/clang_64/mkspecs/macx-clang -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/projects/test-qwebdav -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtNetwork.framework/Headers -I/Users/sigsergv/Qt/5.3/clang_64/lib/QtCore.framework/Headers -F/Users/sigsergv/Qt/5.3/clang_64/lib propfindparser.h -o moc_propfindparser.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -906,7 +922,10 @@ main.o: main.cpp ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/Q
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qsslkey.h \
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qsslsocket.h \
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qtnetworkversion.h \
-		qwebdav.h
+		qwebdav.h \
+		eventloop.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QEventLoop \
+		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/QNetworkReply
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 eventloop.o: eventloop.cpp ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QtDebug \
@@ -918,11 +937,182 @@ eventloop.o: eventloop.cpp ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5
 		../../Qt/5.3/clang_64/lib/QtNetwork.framework/Versions/5/Headers/qnetworkreply.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o eventloop.o eventloop.cpp
 
+propfindparser.o: propfindparser.cpp ../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QtCore \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstractanimation.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qanimationgroup.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qparallelanimationgroup.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qpauseanimation.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qpropertyanimation.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsequentialanimationgroup.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qvariantanimation.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtextcodec.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcompilerdetection.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qendian.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qflags.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qglobal.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qglobalstatic.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qisenum.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlibraryinfo.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qnamespace.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qnumeric.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qprocessordetection.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsysinfo.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsystemdetection.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtypeinfo.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtypetraits.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qbuffer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qdatastream.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qdebug.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qdir.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qdiriterator.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfile.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfiledevice.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfileinfo.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfileselector.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfilesystemwatcher.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qiodevice.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlockfile.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qloggingcategory.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qprocess.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qresource.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsavefile.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsettings.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstandardpaths.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtemporarydir.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtemporaryfile.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtextstream.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qurl.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qurlquery.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstractitemmodel.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstractproxymodel.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qidentityproxymodel.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qitemselectionmodel.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsortfilterproxymodel.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstringlistmodel.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qjsonarray.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qjsondocument.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qjsonobject.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qjsonvalue.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstracteventdispatcher.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstractnativeeventfilter.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qbasictimer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcoreapplication.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcoreevent.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qeventloop.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmath.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmetaobject.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmetatype.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmimedata.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qobject.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qobjectcleanuphandler.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qobjectdefs.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qpointer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsharedmemory.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsignalmapper.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsocketnotifier.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsystemsemaphore.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtimer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtranslator.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qvariant.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qwineventnotifier.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmimedatabase.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmimetype.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfactoryinterface.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlibrary.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qplugin.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qpluginloader.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/quuid.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstractstate.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qabstracttransition.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qeventtransition.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfinalstate.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qhistorystate.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsignaltransition.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstate.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstatemachine.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qatomic.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qexception.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfuture.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfutureinterface.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfuturesynchronizer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qfuturewatcher.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qgenericatomic.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmutex.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qreadwritelock.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qresultstore.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qrunnable.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsemaphore.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qthread.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qthreadpool.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qthreadstorage.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qwaitcondition.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qalgorithms.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qarraydata.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qarraydataops.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qarraydatapointer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qbitarray.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qbytearray.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qbytearraymatcher.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcache.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qchar.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcollator.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcommandlineoption.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcommandlineparser.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcontainerfwd.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcontiguouscache.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qcryptographichash.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qdatetime.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qeasingcurve.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qelapsedtimer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qhash.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qiterator.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qline.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlinkedlist.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlist.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qlocale.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmap.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmargins.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qmessageauthenticationcode.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qpair.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qpoint.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qqueue.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qrect.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qrefcount.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qregexp.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qregularexpression.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qscopedpointer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qscopedvaluerollback.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qset.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qshareddata.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsharedpointer.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qsize.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstack.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstring.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstringbuilder.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstringlist.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qstringmatcher.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtextboundaryfinder.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtimeline.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtimezone.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qvarlengtharray.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qvector.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qxmlstream.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/qtcoreversion.h \
+		propfindparser.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QObject \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QList \
+		qwebdav_types.h \
+		../../Qt/5.3/clang_64/lib/QtCore.framework/Versions/5/Headers/QString
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o propfindparser.o propfindparser.cpp
+
 moc_qwebdav.o: moc_qwebdav.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_qwebdav.o moc_qwebdav.cpp
 
 moc_eventloop.o: moc_eventloop.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_eventloop.o moc_eventloop.cpp
+
+moc_propfindparser.o: moc_propfindparser.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_propfindparser.o moc_propfindparser.cpp
 
 ####### Install
 

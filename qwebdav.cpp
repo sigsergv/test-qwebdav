@@ -4,6 +4,9 @@
 
 #include "qwebdav.h"
 #include "eventloop.h"
+#include "propfindparser.h"
+#include "qwebdav_types.h"
+
 
 struct QWebDav::Private
 {
@@ -118,12 +121,12 @@ QNetworkReply * QWebDav::davRequest(const QString & method, QNetworkRequest & re
  * List of items for given path
  * @param path
  */
-void QWebDav::list(const QString & path)
+QList<WebDavItem> QWebDav::list(const QString & path)
 {
     QUrl reqUrl(p->baseUrl);
     QNetworkRequest request;
 
-    reqUrl.setPath(path);
+    reqUrl.setPath(path, QUrl::StrictMode);
     request.setUrl(reqUrl);
     request.setRawHeader(QByteArray("Depth"), "1");
 
@@ -152,7 +155,7 @@ void QWebDav::list(const QString & path)
     if (p->lastError == AuthFailedError) {
         reply->abort();
         reply->deleteLater();
-        return;
+        return QList<WebDavItem>();
     }
 
     if (reply->error() != QNetworkReply::NoError) {
@@ -160,22 +163,22 @@ void QWebDav::list(const QString & path)
         qDebug() << reply->errorString();
         reply->abort();
         reply->deleteLater();
-        return;
+        return QList<WebDavItem>();
     }
     delete loop;
 
     // parse response
-    QString response = QString::fromUtf8(reply->readAll());
-    qDebug() << "finished: " << response;
+    PropfindParser parser;
+    parser.setDevice(reply);
+    QList<WebDavItem> items = parser.parse();
 
-    // qDebug() << "Headers:";
+    if (parser.lastError() != PropfindParser::NoError) {
+        qDebug() << "failed to parse";
+        p->lastError = XmlParsingError;
+        return QList<WebDavItem>();
+    }
 
-    // // int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-    // foreach (const QNetworkReply::RawHeaderPair & p, reply->rawHeaderPairs()) {
-    //     qDebug() << p.first.constData() << ": " << p.second.constData();
-    // }
-
+    return items;
 }
 
 

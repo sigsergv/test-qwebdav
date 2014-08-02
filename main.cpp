@@ -2,6 +2,7 @@
 #include <QtDebug>
 
 #include "qwebdav.cpp"
+#include "qwebdav_types.h"
 
 int main(int argc, char *argv[])
 {
@@ -26,13 +27,17 @@ int main(int argc, char *argv[])
                 qDebug() << "Network error";
                 break;
 
+            case QWebDav::XmlParsingError:
+                qDebug() << "XML parsing error";
+                break;
+
             case QWebDav::NoError:
                 break;
         }
         return 1;
     }
 
-    wd.list("/%D0%9E%D0%BB%D1%8C%D0%B3%D0%B0%20%D0%93%D1%80%D0%BE%D0%BC%D1%8B%D0%BA%D0%BE/");
+    QList<WebDavItem> items = wd.list("/%D0%92%D0%B0%D1%81%D0%B8%D0%BB%D0%B8%D0%B9%20%D0%95%D1%80%D1%88%D0%BE%D0%B2/");
     error = wd.lastError();
 
     if (error != QWebDav::NoError) {
@@ -49,9 +54,17 @@ int main(int argc, char *argv[])
                 qDebug() << "Network error";
                 break;
 
+            case QWebDav::XmlParsingError:
+                qDebug() << "XML parsing error";
+                break;
+
             case QWebDav::NoError:
                 break;
         }
+    }
+
+    foreach (const WebDavItem & item, items) {
+        qDebug() << item.davStatus << item.name << item.type << item.href;
     }
     
 }
